@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    
+    <link rel="stylesheet" href="menuButton.css">
+    <script src="landingscreenjs.js"></script>
+    <style>
+        /* General Reset */
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: Verdana;
+        }
+
+        /* Flexbox container for layout */
+        .main-container {
+            display: flex;
+            justify-content: space-between; /* Push content to opposite sides */
+            align-items: flex-start; /* Align items at the top */
+            padding: 20px;
+        }
+
+        /* Main table styling */
+        .table-container table {
+            width: 890px;
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        .table-container th, .table-container td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table-container th {
+            background-color: rgb(0, 94, 132);
+            color: white;
+        }
+
+        /* Member list table styling */
+        #listMembers {
+            border: 1px solid black;
+            border-collapse: collapse;
+            width: 400px;
+            right: 200px;
+        }
+
+        #listMembers th {
+            background-color: rgb(0, 94, 132);
+            color: white;
+            text-align: left;
+            padding: 8px;
+        }
+
+        #listMembers td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* Button and other elements */
+        #menuButton {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 150px;
+            padding: 10px;
+            text-align: center;
+            height: 40px;
+        }
+
+        #no1 {
+            font-size: 80px;
+            text-align: center;
+            border-style: solid;
+            border-color: beige;
+            border-width: 8px;
+            margin-top: 10px;
+            padding: 5px;
+        }
+
+        #changeFont {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+        }
+
+        /* Styling for the TPS Table */
+        .ITAtable {
+            border: 0.2px solid #ccc;
+            border-radius: 0px;
+            padding: 10px;
+            background-color: #f4f4f4;
+            width: 100%;
+        }
+
+        #tpsheading {
+            border: 2px solid #006080;
+            background-color:rgb(0, 94, 132); 
+            padding: 3px; 
+            font-weight: bold; 
+            color: white;
+            margin-top: 0px; 
+        }
+
+
+
+
+
+
+
+
+    </style>
+</head>
+
+<body id="landingScreenBody">
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <a href="landingscreen.html">Home Page</a>
+            <a href="addProject.html">Add Project</a>
+            <a href="addUser.html">Add User</a>
+        </div>
+    </div>
+    <!-- Header Section -->
+    <div class="container">
+        <p id="no1">IPMA</p>
+    </div>
+
+    <!-- Font Selector -->
+    <div id="changeFont">
+        <label for="fontSelector">Choose a font:</label>
+        <select id="fontSelector" onchange="changeFont(this)">
+            <option value="default">Arial</option>
+            <option value="font1">Courier New</option>
+            <option value="font2">Georgia</option>
+            <option value="font3">Verdana</option>
+        </select>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        <!-- Main Table -->
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Date Created</th>
+                        <th>Deadline</th>
+                        <th>Importance</th>
+                    </tr>
+                </thead>
+                <tbody id="projectTableBody">
+                    <!-- Projects will be dynamically inserted here -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="ITAtable">
+            <p id="tpsheading">TPS: Task Prioritisation</p>
+            <div id="prioritisedTasks"></div>
+        </div>
+        
+        
+
+        <!-- Member List Table -->
+        <div class="left-container">
+            <table id="listMembers">
+                <thead>
+                    <tr>
+                        <th>Member List</th>
+                    </tr>
+                </thead>
+                <tbody id="memberTableBody">
+                    
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Function to load projects from localStorage and display them on the landing page
+        function loadProjects() {
+            // Retrieve the list of projects from localStorage or initialise with an empty array if not found
+            const projects = JSON.parse(localStorage.getItem('projects')) || [];
+            const projectTableBody = document.getElementById('projectTableBody'); // Target the table body for projects
+            projectTableBody.innerHTML = ''; // Clear any existing content in the table body
+
+            // Loop through each project and create a table row for it
+            projects.forEach((project) => {
+                const row = document.createElement('tr'); // Create a new table row element
+
+                // Create a cell for the project name and link it to the manage projects page/template
+                const nameCell = document.createElement('td');
+                const nameLink = document.createElement('a');
+                nameLink.setAttribute('href', `manageProject.html?name=${encodeURIComponent(project.name)}`); // Add a query parameter for the project name
+                nameLink.textContent = project.name; // Set the link text to the project name
+                nameCell.append(nameLink); // Append the link to the cell
+
+                // Create a cell for the project's creation date
+                const dateCreatedCell = document.createElement('td');
+                dateCreatedCell.textContent = project.dateCreated; // Set the text content to the project's creation date
+
+                // Create a cell for the project's deadline
+                const deadlineCell = document.createElement('td');
+                deadlineCell.textContent = project.deadline; // Set the text content to the project's deadline
+
+                // Create a cell for the project's importance
+                const importanceCell = document.createElement('td');
+                importanceCell.textContent = project.importance; // Set the text content to the project's importance
+
+                // Append all cells to the row
+                row.appendChild(nameCell);
+                row.appendChild(dateCreatedCell);
+                row.appendChild(deadlineCell);
+                row.appendChild(importanceCell);
+
+                // Append the row to the project table body
+                projectTableBody.appendChild(row);
+            });
+        }
+
+        // Function to load users from localStorage and display them in the member list table
+        function loadUsers() {
+            // Retrieve the list of users from localStorage or initialise with an empty array if not found
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const memberTableBody = document.getElementById('memberTableBody'); // Target the table body for members
+            memberTableBody.innerHTML = ''; // Clear any existing content in the table body
+
+            // Loop through each user and create a table row for it
+            users.forEach((user) => {
+                const row = document.createElement('tr'); // Create a new table row element
+                const memberCell = document.createElement('td'); // Create a cell for the user's username
+                memberCell.textContent = user.username; // Set the cell's text content to the user's username
+                row.appendChild(memberCell); // Append the cell to the row
+                memberTableBody.appendChild(row); // Append the row to the member table body
+            });
+        }
+
+        // Function to calculate and display task prioritisation
+        function prioritiseTasks() {
+            // Retrieve the list of projects from localStorage or initialise with an empty array if not found
+            const projects = JSON.parse(localStorage.getItem("projects")) || [];
+
+            // Check if there are any projects to prioritise
+            if (!projects.length) {
+                document.getElementById("prioritisedTasks").innerHTML = "<p>No projects found to prioritise</p>";
+                return;
+            }
+
+            // Prioritise tasks based on a custom priority formula
+            const prioritisedTasks = projects.map(project => {
+                const currentDate = new Date(); // Get the current date
+                const deadlineDate = new Date(project.deadline); // Convert the project's deadline to a Date object
+                const daysRemaining = Math.max(
+                    Math.round((deadlineDate - currentDate) / (1000 * 60 * 60 * 24)), // Calculate the number of days remaining
+                    0 // Ensure no negative values for days remaining
+                );
+
+                // Calculate priority score using weighted factors: deadline, importance, and effort
+                const deadlineScore = Math.min(10, 10 - Math.floor(daysRemaining / 10)) * 0.4; // Weighted score for deadline
+                const importanceScore = project.importance * 0.4; // Weighted score for importance
+                const effortScore = (10 - project.effort) * 0.2; // Weighted score for effort
+
+                // Sum up the scores to calculate the final priority
+                const priority = (deadlineScore + importanceScore + effortScore).toFixed(2); // Round to 2 decimal places
+
+                return {
+                    name: project.name, // Project name
+                    deadline: project.deadline, // Project deadline
+                    daysRemaining, // Days remaining until the deadline
+                    priority // Calculated priority score
+                };
+            });
+
+            // Sort tasks in descending order of priority
+            prioritisedTasks.sort((a, b) => b.priority - a.priority);
+
+            // Display the prioritised tasks in the TPS section
+            const tpsResultDiv = document.getElementById("prioritisedTasks");
+            tpsResultDiv.innerHTML = "<ul>"; // Start an unordered list
+            prioritisedTasks.forEach(task => {
+                // Add each task with its name and priority to the list
+                tpsResultDiv.innerHTML += `
+                    <li>
+                        <strong>${task.name}</strong> - Priority: ${task.priority}
+                    </li>`;
+            });
+            tpsResultDiv.innerHTML += "</ul>"; // Close the list
+        }
+
+        // Add event listeners to execute functions when the window loads
+        window.addEventListener("load", prioritiseTasks); // Prioritise tasks when the page loads
+        window.addEventListener("load", loadProjects); // Load projects when the page loads
+        window.addEventListener("load", loadUsers); // Load users when the page loads
+
+    </script>
+</body>
+</html>

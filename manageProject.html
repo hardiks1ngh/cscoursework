@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="menuButton.css">
+    <script src="landingscreenjs.js"></script>
+
+    <title>Manage Projects</title>
+    <style>
+        /* General page styling */
+        body {
+            font-family: Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Header styling */
+        #manageProject {
+            font-size: 40px;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        /* Layout for main content */
+        .container {
+            display: flex; /* Flexbox layout */
+            justify-content: space-between; /* Space between project and task sections */
+            align-items: flex-start;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Styling for project and task boxes */
+        .projectTable, .taskTable {
+            border-radius: 25px; /* Rounded corners */
+            background: #73AD21; /* Green background */
+            padding: 20px;
+            width: 45%; /* Equal width for boxes */
+            box-sizing: border-box;
+            color: white; /* White text */
+        }
+
+        .projectTable { text-align: left; } /* Left align for project table */
+        .taskTable { text-align: center; } /* Center align for task table */
+
+        #projectDetails, #taskDetails {
+            color: black; /* Black text for headings */
+            font-weight: bold;
+            text-align: center;
+            font-size: larger;
+            margin-bottom: 20px;
+        }
+
+        #taskList {
+            text-align: left;
+            margin-top: 20px;
+            color: black;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        /* Styling for "Add Task" button */
+        #addTaskButton {
+            background-color: #555; /* Grey background */
+            color: white;
+            padding: 16px 20px;
+            border: none;
+            cursor: pointer;
+            opacity: 0.8;
+            width: 100%;
+        }
+
+        #addTaskButton:hover { 
+            opacity: 1;
+        } /* Highlight on hover */
+
+        /* Popup form styling */
+        .form-popup {
+            display: none; /* Hidden by default */
+            position: fixed; /* Fixed position on screen */
+            bottom: 0;
+            right: 15px;
+            border: 3px solid #f1f1f1;
+            z-index: 9; /* Above other elements */
+        }
+
+        .form-container {
+            max-width: 300px; /* Limit form width */
+            padding: 10px;
+            background-color: white;
+        }
+
+        .form-container input[type=text] {
+            width: 100%;
+            padding: 15px;
+            margin: 5px 0 22px 0;
+            border: none;
+            background: #f1f1f1;
+        }
+
+        .form-container input[type=text]:focus {
+            background-color: #ddd; /* Highlight on focus */
+            outline: none;
+        }
+
+        /* Buttons in form */
+        .form-container .btn {
+            background-color: #04AA6D; /* Green background */
+            color: white;
+            padding: 16px 20px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .ITAtable {
+            position: relative;
+            width: 20%;
+            padding: 15px;
+            margin: 5px 0 22px 0;
+            background: #7dc968;
+        }
+
+        .form-container .btn:hover { opacity: 1; } /* Highlight on hover */
+        .form-container .cancel { background-color: red; } /* Red for cancel button */
+    </style>
+    <script>
+        // Class to manage projects
+        class ProjectManager {
+            constructor() {
+                // Retrieve the list of projects from local storage or initialise an empty array if not found
+                this.projects = JSON.parse(localStorage.getItem("projects")) || [];
+            }
+
+            // Retrieve all projects
+            getProjects() {
+                return this.projects;
+            }
+
+            // Retrieve a specific project by its name (case-insensitive)
+            getProjectByName(name) {
+                if (!name) return null; // If no name is provided, return null
+                return this.projects.find(
+                    (project) => project.name.trim().toLowerCase() === name.trim().toLowerCase()
+                );
+            }
+
+            // Load and display project details based on the query parameter in the URL
+            loadProjectDetails() {
+                const urlParams = new URLSearchParams(window.location.search); // Parse URL parameters
+                const projectName = urlParams.get("name"); // Retrieve the 'name' parameter
+
+                const project = this.getProjectByName(projectName); // Find the project by name
+
+                if (project) {
+                    // Populate the project details on the page
+                    document.getElementById("projectName").innerText = `Name: ${project.name}`;
+                    document.getElementById("dateCreated").innerText = `Date Created: ${project.dateCreated}`;
+                    document.getElementById("deadline").innerText = `Deadline: ${project.deadline}`;
+                    document.getElementById("importance").innerText = `Importance: ${project.importance}`;
+                    document.getElementById("effort").innerText = `Effort: ${project.effort}`;
+                    document.getElementById("skillsRequired").innerText = `Skills Required: ${project.skillsRequired
+                        .map((skill) => `${skill.skill} (Rating: ${skill.rating})`) // Map each skill object to a string displaying the skill name and its rating
+                        .join(", ")}`; // Join all skill strings with a comma and a space to create a readable list
+                } else {
+                    // Handle case where project is not found, shows "Project not found" on the project details section 
+                    document.getElementById("projectName").innerText = "Project not found.";
+                }
+            }
+        }
+
+        // Class to manage tasks
+        class TaskManager {
+            constructor() {
+                // Retrieve the list of tasks from local storage or initialise an empty array if not found
+                this.tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+            }
+
+            // Add a new task to the task list
+            addTask(taskName, taskDetails) {
+                this.tasks.push({ name: taskName, details: taskDetails }); // Add task to the list
+                localStorage.setItem("tasks", JSON.stringify(this.tasks)); // Save updated task list to local storage
+                this.displayTasks(); // Refresh the displayed task list
+            }
+
+            // Display all tasks on the page
+            displayTasks() {
+                const taskList = document.getElementById("taskList"); // Get the task list element
+                taskList.innerHTML = ""; // Clear existing tasks
+
+                // Iterate through each task and add it to the task list
+                this.tasks.forEach((task, index) => {
+                    const taskItem = document.createElement("p");
+                    taskItem.textContent = `${index + 1}. ${task.name} - ${task.details}`;
+                    taskList.appendChild(taskItem);
+                });
+            }
+        }
+
+        // Class to manage task assignments to team members
+        class TaskAssignmentManager {
+            // Assign tasks to members by sending a request to the backend
+            async assignTasks() {
+                const projects = JSON.parse(localStorage.getItem("projects")) || []; // Retrieve projects
+                const users = JSON.parse(localStorage.getItem("users")) || []; // Retrieve users
+                try {
+                    // Make a POST request to assign task, the post is asynchronous 
+                    const response = await fetch("http://127.0.0.1:8000/assign-tasks", {
+                        method: "POST", // Set the HTTP method as POST, used to send data to the server
+                        headers: {
+                            "Content-Type": "application/json", // Show that the request body contains JSON data
+                        },
+                        body: JSON.stringify({ projects, users }), // Convert the projects and users data into a JSON string for the request 
+                    });
+
+
+                    if (!response.ok) {
+                        // Handle HTTP errors
+                        throw new Error(`Failed to assign tasks. HTTP Status: ${response.status}`);
+                    }
+
+                    // Parse the response to get the assignments
+                    const result = await response.json();
+
+                    // Display the task assignments on the page
+                    const assignmentsDiv = document.getElementById("assignments");
+                    assignmentsDiv.innerHTML = "<ul>";
+                    // Loop through each task-member pair in the assignments object returned by the server
+                    for (const [task, member] of Object.entries(result.assignments)) {
+                        // Dynamically add each task-member pair as a list item to the assignmentsDiv element
+                        // The task is displayed along with "->" and the assigned member
+                        assignmentsDiv.innerHTML += `<li>${task} -> ${member}</li>`;
+                    }
+                    assignmentsDiv.innerHTML += "</ul>";
+                } catch (error) {
+                    // Handle any errors during the task assignment process
+                    alert(`An error occurred while assigning tasks: ${error.message}`);
+                }
+            }
+        }
+
+
+
+        // Instantiate the ProjectManager, TaskManager, and TaskAssignmentManager classes
+        const projectManager = new ProjectManager();
+        const taskManager = new TaskManager();
+        const taskAssignmentManager = new TaskAssignmentManager();
+
+        // Function to add a task when the form is submitted
+        function addTask(event) {
+            event.preventDefault(); // Prevent the default form submission behavior
+            const taskName = document.getElementById("taskName").value; // Get the task name from the input field
+            const taskDetails = document.getElementById("taskDetails").value; // Get the task details from the input field
+            taskManager.addTask(taskName, taskDetails); // Add the task using TaskManager
+            closeForm(); // Close the form after adding the task
+        }
+
+        // Function to open the popup form for adding a new task
+        function openForm() {
+            document.getElementById("myForm").style.display = "block"; // Set the form's display style to "block" to make it visible
+        }
+
+        // Function to close the popup form for adding a new task
+        function closeForm() {
+            document.getElementById("myForm").style.display = "none"; // Set the form's display style to "none" to hide it
+        }
+
+        // Function to execute when the page loads
+        window.onload = function () {
+            projectManager.loadProjectDetails(); // Load and display project details using ProjectManager
+            taskManager.displayTasks(); // Display the list of tasks using TaskManager
+        };
+
+    </script>
+</head>
+<body id="manageProjectBody">
+
+    <!-- Dropdown menu -->
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <a href="landingscreen.html">Home Page</a>
+            <a href="addProject.html">Add Project</a>
+            <a href="addUser.html">Add User</a>
+        </div>
+    </div>
+
+    <!-- Page header -->
+    <p id="manageProject">Manage Projects</p>
+
+    <!-- Main content -->
+    <div class="container">
+        <!-- Project details -->
+        <div class="projectTable">
+            <p id="projectName">Name: </p>
+            <p id="dateCreated">Date Created: </p>
+            <p id="deadline">Deadline: </p>
+            <p id="importance">Importance: </p>
+            <p id="effort">Effort: </p>
+            <p id="skillsRequired">Skills Required: </p>
+        </div>
+
+        <div id="itaResult" class="ITAtable">
+            <p>ITA: Task Assignments</p>
+            <input id="ITAButton" type="button" value="Generate Members" onclick="taskAssignmentManager.assignTasks()">
+            <div id="assignments"></div>
+        </div>
+
+        <!-- Task details -->
+        <div class="taskTable">
+            <p id="taskDetails">Task Details</p>
+            <input id="addTaskButton" type="button" value="Add Task" onclick="openForm()">
+            <div id="taskList"></div>
+        </div>
+    </div>
+
+    <!-- Popup form for adding tasks -->
+    <div class="form-popup" id="myForm">
+        <form id="taskForm" class="form-container" onsubmit="addTask(event)">
+            <label for="taskName"><b>Task Name</b></label>
+            <input type="text" id="taskName" placeholder="Enter task name" required>
+
+            <label for="taskDetails"><b>Task Details</b></label>
+            <input type="text" id="taskDetails" placeholder="Enter task details" required>
+
+            <button type="submit" class="btn">Add Task</button>
+            <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+        </form>
+    </div>
+</body>
+</html>
