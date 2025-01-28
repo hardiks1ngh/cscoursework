@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Projects</title>
+    <link rel="stylesheet" href="menuButton.css">
+    <script src="landingscreenjs.js"></script>
+    <style>
+        body {
+            font-family: Verdana, sans-serif;
+            background-color: #f4f4f4;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .main-container {
+            display: flex;
+            max-width: 1000px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+
+        .container {
+            flex: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2, h3 {
+            text-align: center;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .form-group select, .form-group input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .form-group .skill-container {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+
+        .form-group .skill-container input {
+            width: 45%;
+        }
+
+        button {
+            display: inline-block;
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #projectList ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #projectList li {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body id="addProjectBody">
+    <div class="dropdown">
+        <button class="dropbtn">Menu</button>
+        <div class="dropdown-content">
+            <a href="landingscreen.html">Home Page</a>
+            <a href="addProject.html">Add Project</a>
+            <a href="addUser.html">Add User</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="container">
+            <h2>Create Projects</h2>
+            <form id="projectForm">
+                <div class="form-group">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="date-created">Date Created:</label>
+                    <input type="date" id="date-created" name="date-created" required>
+                </div>
+                <div class="form-group">
+                    <label for="deadline">Deadline:</label>
+                    <input type="date" id="deadline" name="deadline" required>
+                </div>
+                <div class="form-group">
+                    <label for="importance">Importance:</label>
+                    <input type="number" id="importance" name="importance" min="1" max="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="effort">Effort Required:</label>
+                    <input type="number" id="effort" name="effort" min="1" max="10" required>
+                </div>
+                <div class="form-group">
+                    <label for="skills-required">Skills Required:</label>
+                    <div class="skill-container">
+                        <select id="skill1" name="skill1">
+                            <option value="">Select Skill 1</option>
+                            <option value="JavaScript">JavaScript</option>
+                            <option value="Python">Python</option>
+                            <option value="HTML">HTML</option>
+                            <option value="CSS">CSS</option>
+                            <option value="Java">Java</option>
+                            <option value="C++">C++</option>
+                        </select>
+                        <input type="number" id="rating1" name="rating1" min="1" max="10" placeholder="Rate (1-10)">
+                    </div>
+                    <div class="skill-container">
+                        <select id="skill2" name="skill2">
+                            <option value="">Select Skill 2</option>
+                            <option value="JavaScript">JavaScript</option>
+                            <option value="Python">Python</option>
+                            <option value="HTML">HTML</option>
+                            <option value="CSS">CSS</option>
+                            <option value="Java">Java</option>
+                            <option value="C++">C++</option>
+                        </select>
+                        <input type="number" id="rating2" name="rating2" min="1" max="10" placeholder="Rate (1-10)">
+                    </div>
+                </div>
+                <button type="submit">Create Project</button>
+            </form>
+
+            <div id="projectList">
+                <h3>Projects List</h3>
+                <ul id="projects"></ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Class to manage project-related operations
+        class ProjectManager {
+            constructor() {
+                // Retrieve the projects from localStorage or initialise with an empty array if no projects are found
+                this.projects = JSON.parse(localStorage.getItem('projects')) || [];
+            }
+
+            // Method to add a project to the list and update localStorage
+            addProject(project) {
+                this.projects.push(project); // Add the new project to the projects array
+                localStorage.setItem('projects', JSON.stringify(this.projects)); // Save the updated projects array to localStorage
+            }
+
+            // Method to display all projects in the project list on the page
+            displayProjects() {
+                const projectsList = document.getElementById('projects'); // Target the element where projects will be displayed
+                projectsList.innerHTML = ''; // Clear any existing content in the project list
+
+                // Loop through the projects and create a list item for each
+                this.projects.forEach((project) => {
+                    const li = document.createElement('li'); // Create a list item element
+                    // Add a link to manage the project, with the project name as the display text
+                    li.innerHTML = `<a href="manageProject.html?name=${encodeURIComponent(project.name)}">${project.name}</a>`;
+                    projectsList.appendChild(li); // Append the list item to the project list
+                });
+            }
+        }
+
+        // Create an instance of the ProjectManager class
+        const projectManager = new ProjectManager();
+
+        // Add an event listener to handle the form submission
+        document.getElementById('projectForm').addEventListener('submit', (event) => {
+            event.preventDefault(); // Prevent the default form submission behavior
+
+            // Retrieve and trim form inputs
+            const name = document.getElementById('name').value.trim(); // Get the project name
+            const dateCreated = document.getElementById('date-created').value.trim(); // Get the project creation date
+            const deadline = document.getElementById('deadline').value.trim(); // Get the project deadline
+            const importance = parseInt(document.getElementById('importance').value, 10); // Parse the importance value as an integer
+            const effort = parseInt(document.getElementById('effort').value, 10); // Parse the effort value as an integer
+
+            // Retrieve and validate skills and ratings
+            const skill1 = document.getElementById('skill1').value.trim(); // Get the first skill
+            const rating1 = parseInt(document.getElementById('rating1').value, 10) || 0; // Parse the first skill rating or default to 0
+            const skill2 = document.getElementById('skill2').value.trim(); // Get the second skill
+            const rating2 = parseInt(document.getElementById('rating2').value, 10) || 0; // Parse the second skill rating or default to 0
+
+            // Create a project object with all form inputs
+            const project = {
+                name, // Project name
+                dateCreated, // Date created
+                deadline, // Project deadline
+                importance, // Importance rating
+                effort, // Effort rating
+                skillsRequired: [
+                    { skill: skill1, rating: rating1 }, // First skill with its rating
+                    { skill: skill2, rating: rating2 }, // Second skill with its rating
+                ],
+            };
+
+            // Add the project to the project list and update the display
+            projectManager.addProject(project);
+            projectManager.displayProjects();
+
+            // Reset the form fields for the next input
+            document.getElementById('projectForm').reset();
+        });
+
+        // Event listener to display projects when the page loads
+        window.onload = () => {
+            projectManager.displayProjects(); // Display the existing projects on page load
+        };
+
+    </script>
+</body>
+</html>
